@@ -1,0 +1,154 @@
+library(readr)
+data11=read_csv("../input/fifa19/data.csv", col_types = cols( Wage=col_number(),Value=col_number()))
+
+# Data Cleaning
+x=data.frame(data11)
+data_frame1=x[,-c(1,5,7,11,25,28:54)] #removing columns
+good=complete.cases(data_frame1)
+fifa=data_frame1[good,]
+View(fifa)
+
+# Summary of Fifa 19
+library(ggplot2)
+library(dplyr)
+fifa1=fifa%>%rename(Wages_in_euro=Wage,Value_in_euro=Value)
+summary(fifa1)
+
+# Total Numer of Left and Rigth foots
+ggplot(data=fifa,aes(x=Preferred.Foot))+
+geom_bar(aes(y=(..count..)/sum(..count..)),fill="red")+
+scale_y_continuous(labels=scales::percent)+ylab("percent")+
+ggtitle("                             Foot")+theme(axis.title = element_text(size=15))
+
+fifa_foot=fifa%>%select(Preferred.Foot)%>%count(Preferred.Foot)
+View(fifa_foot)
+
+#number of left and right foot in terms of position
+ggplot(data=fifa,aes(x=Preferred.Foot,y=Overall,fill=Position))+geom_boxplot()+
+theme(axis.title = element_text(size=15))
+
+# Distribution of players nationalities
+# Distribution of players nationalities
+c=fifa%>%select(Nationality)%>%count(Nationality)
+c1=data.frame(c)
+c2=c1%>%select(1:2)%>%rename(Total_number=n)%>%top_n(10)# finding top 10 values
+c33=c2[order(-c2$Total_number),]  # for sorting decending in data frame
+View(c33)
+ggplot(data=c33,aes(x=Nationality,y=Total_number,fill=Nationality))+
+  geom_bar(stat="identity")
+
+
+# Top 10 Players wages in euros
+fifa_wage=fifa1%>%
+  filter(Wages_in_euro>=100 & Wages_in_euro<=500)%>%top_n(10,Wages_in_euro)%>%
+  arrange(-Wages_in_euro)%>%head(10) #decending order
+View(fifa_wage)
+
+ggplot(data=fifa_wage,aes(x=Name,y=Wages_in_euro,fill=Wages_in_euro))+
+geom_bar(stat="identity")+ylab("wages")+ggtitle("
+                                            wages in Euro (K)")
+#wages in terms of nationality
+ggplot(data=fifa_wage,aes(x=Name,y=Wages_in_euro,fill=Nationality))+
+  geom_bar(stat="identity")+ylab("wages")+ggtitle("
+                                            wages in Euro (K)")
+#wages in terms of club
+ggplot(data=fifa_wage,aes(x=Name,y=Wages_in_euro,fill=Club))+
+  geom_bar(stat="identity")+ylab("wages")+ggtitle("
+                                            wages in Euro (K)")
+
+
+# Distribution of Position of Players
+ggplot(data=fifa1,aes(x=Position,fill=Position))+geom_bar()
+
+
+# Contract expiry
+fifa1_exp=fifa1%>%select(1:25) #1:10,Contract.Valid.Until
+ggplot(data=fifa1_exp,aes(x=Contract.Valid.Until,fill=Contract.Valid.Until))+
+theme(axis.title = element_text(size=15))+theme(axis.text = element_text(size=12))+
+geom_bar()
+
+#according to peferred foot
+ggplot(data=fifa1_exp,aes(x=Contract.Valid.Until,fill=Preferred.Foot))+
+theme(axis.title = element_text(size=15))+
+geom_bar()+theme(axis.text = element_text(size=12))
+
+#according to position
+ggplot(data=fifa1_exp,aes(x=Contract.Valid.Until,fill=Position))+
+geom_bar()+theme(axis.title = element_text(size=15))+
+theme(axis.text = element_text(size=12))
+
+
+
+# Average Rating of Players
+#according to the nationality
+c=fifa1%>%select(Nationality,Overall,Club)%>%group_by(Nationality)%>%
+summarise(Average_rating=mean(Overall))%>%top_n(10,)%>%head(10)
+cc=c%>%arrange(c$Average_rating)
+View(cc)
+
+ggplot(data=cc,aes(x=Nationality,y=Average_rating,fill=Nationality))+
+geom_bar(stat="identity")+theme(axis.title = element_text(size=15))
+
+#according to the club
+c1=fifa1%>%select(Nationality,Overall,Club)%>%group_by(Club)%>%
+summarise(Average_rating=mean(Overall))%>%top_n(10)%>%head(10)
+c11=c1%>%arrange(c1$Average_rating)
+View(c11)
+
+ggplot(data=c11,aes(x=Club,y=Average_rating,fill=Club))+geom_bar(stat="identity")+
+theme(axis.title = element_text(size=15))
+
+# Age distribution
+# Age distribution of top 20
+fifa_age=fifa1%>%top_n(20,fifa1$Age)%>%arrange(-Age,Overall,Potential)%>%head(20)
+View(fifa_age)
+
+
+# Total number of ages players
+#According to the position
+ggplot(data=fifa_age,aes(x=Age,fill=Position))+geom_histogram()+ylab("frequency")
+
+
+# Top 10 values according to value
+fifa_top10=fifa1%>%top_n(10,fifa1$Value_in_euro)%>%arrange(-Value_in_euro,Overall)%>%
+head(10)
+View(fifa_top10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
